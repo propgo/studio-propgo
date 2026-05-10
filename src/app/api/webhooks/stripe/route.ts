@@ -13,15 +13,21 @@ function getServiceSupabase() {
 }
 
 const PRICE_TO_PLAN: Record<string, PlanId> = {
-  [process.env.STRIPE_PRICE_STARTER ?? ""]: "starter",
-  [process.env.STRIPE_PRICE_PRO ?? ""]: "pro",
-  [process.env.STRIPE_PRICE_AGENCY ?? ""]: "agency",
+  "price_1TVTiAKnHg6syObsuD0ZoivK": "starter",
+  "price_1TVTiBKnHg6syObsmwe6VNUS": "pro",
+  "price_1TVTiCKnHg6syObsMSFb5cRS": "agency",
+  ...(process.env.STRIPE_PRICE_STARTER ? { [process.env.STRIPE_PRICE_STARTER]: "starter" } : {}),
+  ...(process.env.STRIPE_PRICE_PRO ? { [process.env.STRIPE_PRICE_PRO]: "pro" } : {}),
+  ...(process.env.STRIPE_PRICE_AGENCY ? { [process.env.STRIPE_PRICE_AGENCY]: "agency" } : {}),
 };
 
 const PRICE_TO_TOPUP_CREDITS: Record<string, number> = {
-  [process.env.STRIPE_PRICE_TOPUP_SMALL ?? ""]: 50,
-  [process.env.STRIPE_PRICE_TOPUP_MEDIUM ?? ""]: 150,
-  [process.env.STRIPE_PRICE_TOPUP_LARGE ?? ""]: 500,
+  "price_1TVTiCKnHg6syObsSzYuVkrJ": 50,
+  "price_1TVTiDKnHg6syObsM9Q0pqGe": 150,
+  "price_1TVTiEKnHg6syObs85Rd1a9w": 500,
+  ...(process.env.STRIPE_PRICE_TOPUP_SMALL ? { [process.env.STRIPE_PRICE_TOPUP_SMALL]: 50 } : {}),
+  ...(process.env.STRIPE_PRICE_TOPUP_MEDIUM ? { [process.env.STRIPE_PRICE_TOPUP_MEDIUM]: 150 } : {}),
+  ...(process.env.STRIPE_PRICE_TOPUP_LARGE ? { [process.env.STRIPE_PRICE_TOPUP_LARGE]: 500 } : {}),
 };
 
 async function grantSubscriptionCredits(userId: string, planId: PlanId, stripeSubscriptionId: string, stripeCustomerId: string) {
