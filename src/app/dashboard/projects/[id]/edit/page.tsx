@@ -4,6 +4,7 @@ import { WizardShell } from "@/components/projects/wizard-shell";
 import { FloorPlanStep } from "@/components/projects/floor-plan-step";
 import { PhotoStep } from "@/components/projects/photo-step";
 import { StoryboardStep } from "@/components/projects/storyboard-step";
+import { VoiceoverStep } from "@/components/projects/voiceover-step";
 import type { StoryboardScene } from "@/lib/ai/generate-storyboard";
 
 interface Props {
@@ -94,7 +95,10 @@ export default async function EditProjectPage({ params, searchParams }: Props) {
         />
       )}
       {currentStep === 5 && (
-        <div className="text-white/40 text-sm">Voiceover — coming in Phase 6</div>
+        <VoiceoverStep
+          projectId={id}
+          scenes={latestStoryboard ? (latestStoryboard.scenes as StoryboardScene[]) : []}
+        />
       )}
     </WizardShell>
   );
