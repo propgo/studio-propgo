@@ -55,10 +55,19 @@ export async function signOut() {
 export async function signInWithGoogle(): Promise<{ error: string } | void> {
   const supabase = await createClient();
 
+  // NEXT_PUBLIC_APP_URL must be in Supabase's allowed redirect URLs list
+  // Production: https://studio.propgo.my/auth/callback
+  // Local: http://localhost:3000/auth/callback
+  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      redirectTo,
+      queryParams: {
+        access_type: "offline",
+        prompt: "select_account",
+      },
     },
   });
 

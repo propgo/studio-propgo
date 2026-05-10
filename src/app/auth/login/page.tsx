@@ -29,7 +29,16 @@ function LoginForm() {
     setError(null);
     startTransition(async () => {
       const result = await signIn(formData);
-      if (result?.error) setError(result.error);
+      if (result?.error) {
+        const msg = result.error.toLowerCase();
+        if (msg.includes("invalid login credentials") || msg.includes("invalid_credentials")) {
+          setError("Incorrect email or password. If you signed up with Google, use 'Continue with Google' instead.");
+        } else if (msg.includes("email not confirmed")) {
+          setError("Please confirm your email first. Check your inbox for a confirmation link.");
+        } else {
+          setError(result.error);
+        }
+      }
     });
   }
 
