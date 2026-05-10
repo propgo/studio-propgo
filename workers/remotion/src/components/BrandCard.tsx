@@ -109,12 +109,30 @@ export const BrandCard: React.FC<BrandCardProps> = ({ brandKit, projectTitle }) 
           {brandKit.agentName}
         </p>
 
+        {/* Agency */}
+        {brandKit.agencyName && (
+          <p
+            style={{
+              color: "rgba(255,255,255,0.5)",
+              fontSize: 26,
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
+              margin: 0,
+              textAlign: "center",
+            }}
+          >
+            {brandKit.agencyName}
+          </p>
+        )}
+
         {/* Contact */}
         <div
           style={{
             display: "flex",
             gap: 32,
             alignItems: "center",
+            flexWrap: "wrap",
+            justifyContent: "center",
           }}
         >
           {brandKit.agentPhone && (
@@ -128,6 +146,18 @@ export const BrandCard: React.FC<BrandCardProps> = ({ brandKit, projectTitle }) 
               }}
             >
               {brandKit.agentPhone}
+            </p>
+          )}
+          {brandKit.websiteUrl && (
+            <p
+              style={{
+                color: "rgba(255,255,255,0.4)",
+                fontSize: 22,
+                fontFamily: "Inter, sans-serif",
+                margin: 0,
+              }}
+            >
+              {brandKit.websiteUrl.replace(/^https?:\/\//, "")}
             </p>
           )}
           {brandKit.agentEmail && (

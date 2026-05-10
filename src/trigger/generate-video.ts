@@ -126,7 +126,23 @@ export const generatePropertyVideo = task({
       throw new Error("No clips generated");
     }
 
-    // Step 3: Call Remotion worker to stitch clips
+    // Step 3: Load brand kit from user profile
+    const { data: profileRow } = await supabase
+      .from("profiles")
+      .select("brand_kit")
+      .eq("id", payload.userId)
+      .single();
+
+    const brandKit = (profileRow?.brand_kit as {
+      agentName?: string;
+      agentPhone?: string;
+      agencyName?: string;
+      websiteUrl?: string;
+      primaryColor?: string;
+      logoUrl?: string | null;
+    } | null) ?? {};
+
+    // Step 4: Call Remotion worker to stitch clips
     await updateStatus("rendering", {
       fal_job_id: `clips-${payload.generationId}`,
     });
@@ -150,8 +166,12 @@ export const generatePropertyVideo = task({
             }))
             .filter((_, i) => clipUrls[i]),
           brandKit: {
-            agentName: "PropGo Agent",
-            primaryColor: "#4A6CF7",
+            agentName: brandKit.agentName ?? "PropGo Agent",
+            agentPhone: brandKit.agentPhone,
+            agencyName: brandKit.agencyName,
+            websiteUrl: brandKit.websiteUrl,
+            primaryColor: brandKit.primaryColor ?? "#4A6CF7",
+            logoUrl: brandKit.logoUrl ?? null,
           },
           musicTrack: payload.musicTrack,
           aspectRatio: payload.aspectRatio,
@@ -204,7 +224,7 @@ export const generatePropertyVideo = task({
       logger.warn("REMOTION_WORKER_URL not set — using raw clip as output");
     }
 
-    // Step 4: Mark complete + deduct credits
+    // Step 5: Mark complete + deduct credits
     await updateStatus("complete", {
       output_url: finalOutputUrl,
       completed_at: new Date().toISOString(),

@@ -11,7 +11,9 @@ export interface BrandKit {
   agentName: string;
   agentPhone?: string;
   agentEmail?: string;
-  logoUrl?: string;
+  agencyName?: string;
+  websiteUrl?: string;
+  logoUrl?: string | null;
   primaryColor?: string;
 }
 
