@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { WizardShell } from "@/components/projects/wizard-shell";
 import { FloorPlanStep } from "@/components/projects/floor-plan-step";
 import { PhotoStep } from "@/components/projects/photo-step";
+import { StoryboardStep } from "@/components/projects/storyboard-step";
+import type { StoryboardScene } from "@/lib/ai/generate-storyboard";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -31,8 +33,8 @@ export default async function EditProjectPage({ params, searchParams }: Props) {
 
   if (!project) notFound();
 
-  // Fetch floor plans + photos for this project
-  const [{ data: floorPlans }, { data: photos }] = await Promise.all([
+  // Fetch floor plans + photos + latest storyboard
+  const [{ data: floorPlans }, { data: photos }, { data: storyboards }] = await Promise.all([
     supabase
       .schema("video")
       .from("project_floor_plans")
@@ -45,7 +47,16 @@ export default async function EditProjectPage({ params, searchParams }: Props) {
       .select("id, storage_path, scene_tag, ai_suggested_tag, upload_order")
       .eq("project_id", id)
       .order("upload_order", { ascending: true }),
+    supabase
+      .schema("video")
+      .from("storyboards")
+      .select("id, scenes, version")
+      .eq("project_id", id)
+      .order("version", { ascending: false })
+      .limit(1),
   ]);
+
+  const latestStoryboard = storyboards?.[0];
 
   return (
     <WizardShell currentStep={currentStep}>
@@ -76,7 +87,11 @@ export default async function EditProjectPage({ params, searchParams }: Props) {
         />
       )}
       {currentStep === 4 && (
-        <div className="text-white/40 text-sm">Storyboard — coming in Phase 5</div>
+        <StoryboardStep
+          projectId={id}
+          existingScenes={latestStoryboard ? (latestStoryboard.scenes as StoryboardScene[]) : undefined}
+          existingStoryboardId={latestStoryboard?.id as string | undefined}
+        />
       )}
       {currentStep === 5 && (
         <div className="text-white/40 text-sm">Voiceover — coming in Phase 6</div>
