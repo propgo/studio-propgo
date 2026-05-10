@@ -3,7 +3,7 @@
 import { useState, useTransition, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { signIn, signInWithGoogle } from "@/lib/supabase/actions";
+import { signIn } from "@/lib/supabase/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,10 +43,7 @@ function LoginForm() {
   }
 
   function handleGoogle() {
-    startTransition(async () => {
-      const result = await signInWithGoogle();
-      if (result?.error) setError(result.error);
-    });
+    window.location.href = "/api/auth/google";
   }
 
   return (

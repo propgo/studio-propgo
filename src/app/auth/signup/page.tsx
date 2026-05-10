@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { signUp, signInWithGoogle } from "@/lib/supabase/actions";
+import { signUp } from "@/lib/supabase/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,10 +25,7 @@ export default function SignupPage() {
   }
 
   function handleGoogle() {
-    startTransition(async () => {
-      const result = await signInWithGoogle();
-      if (result?.error) setError(result.error);
-    });
+    window.location.href = "/api/auth/google";
   }
 
   if (success) {
