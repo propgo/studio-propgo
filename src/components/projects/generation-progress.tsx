@@ -3,18 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   CheckCircle2,
   XCircle,
   Clock,
-  Download,
-  Share2,
   RefreshCw,
   Clapperboard,
   ArrowLeft,
 } from "lucide-react";
 import { useGenerationProgress, STATUS_LABELS, type GenerationStatus } from "@/hooks/use-generation-progress";
+import { VideoPlayer } from "./video-player";
+import { ShareButtons } from "./share-buttons";
 
 interface GenerationProgressProps {
   generationId: string;
@@ -140,46 +140,23 @@ export function GenerationProgress({ generationId, projectId, onCancel }: Genera
       </div>
 
       {/* Actions */}
-      {isComplete && (
-        <div className="space-y-4 w-full max-w-md">
-          {/* Video preview */}
-          {outputUrl && (
-            <div className="rounded-xl overflow-hidden bg-black border border-studio-border">
-              <video
-                src={outputUrl}
-                controls
-                autoPlay
-                loop
-                muted
-                className="w-full max-h-64 object-contain"
-              />
-            </div>
-          )}
-          {durationSeconds && (
-            <p className="text-xs text-white/30 text-center">{durationSeconds}s · AI generated</p>
-          )}
-          <div className="flex gap-3">
-            {outputUrl && (
-              <a
-                href={outputUrl}
-                download="propgo-video.mp4"
-                className={buttonVariants({
-                  className: "flex-1 bg-brand-primary hover:bg-brand-primary/90 text-white gap-2",
-                })}
-              >
-                <Download className="w-4 h-4" />
-                Download
-              </a>
-            )}
-            <Button
-              variant="outline"
-              className="flex-1 border-studio-border text-white/50 hover:text-white gap-2"
-              onClick={() => navigator.clipboard.writeText(outputUrl ?? "")}
-            >
-              <Share2 className="w-4 h-4" />
-              Copy Link
-            </Button>
-          </div>
+      {isComplete && outputUrl && (
+        <div className="space-y-4 w-full max-w-lg">
+          {/* Video player */}
+          <VideoPlayer
+            src={outputUrl}
+            title={`AI Generated · ${durationSeconds ?? 0}s`}
+            className="w-full aspect-video"
+            autoPlay
+          />
+
+          {/* Share buttons */}
+          <ShareButtons
+            generationId={generationId}
+            outputUrl={outputUrl}
+            projectTitle="Property Video"
+          />
+
           <Link
             href="/dashboard/projects"
             className={buttonVariants({
