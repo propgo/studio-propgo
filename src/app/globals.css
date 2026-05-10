@@ -117,6 +117,21 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* PropGo Studio design tokens — static values baked in at build time */
+@theme {
+  --color-brand-primary: #4A6CF7;
+  --color-brand-accent: #FFC107;
+  --color-brand-success: #22C55E;
+  --color-brand-error: #EF4444;
+
+  --color-studio-bg: #0A0A0F;
+  --color-studio-surface: #13131A;
+  --color-studio-border: #1E1E2E;
+  --color-studio-muted: #2A2A3E;
+
+  --font-sans: Inter, sans-serif;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
