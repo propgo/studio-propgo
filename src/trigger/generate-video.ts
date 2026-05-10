@@ -1,0 +1,169 @@
+import { task, logger } from "@trigger.dev/sdk/v3";
+import { createClient } from "@supabase/supabase-js";
+import { generateVideoClipWithFallback } from "@/lib/fal/generate-video";
+import type { GenerationModelId, AspectRatioId } from "@/lib/constants/generation";
+import type { StoryboardScene } from "@/lib/ai/generate-storyboard";
+
+interface GenerateVideoPayload {
+  generationId: string;
+  projectId: string;
+  storyboardId: string;
+  userId: string;
+  modelId: GenerationModelId;
+  aspectRatio: AspectRatioId;
+  quality: string;
+  musicTrack: string;
+  creditsToDeduct: number;
+  voiceoverScript: { sceneId: string; narrationLine: string }[];
+}
+
+function getServiceSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { db: { schema: "video" } }
+  );
+}
+
+export const generatePropertyVideo = task({
+  id: "generate-property-video",
+  maxDuration: 3600, // 60 minutes max
+  run: async (payload: GenerateVideoPayload) => {
+    const supabase = getServiceSupabase();
+
+    async function updateStatus(
+      status: string,
+      extra: Record<string, unknown> = {}
+    ) {
+      await supabase
+        .from("generations")
+        .update({ status, ...extra })
+        .eq("id", payload.generationId);
+    }
+
+    logger.info("Starting video generation", { generationId: payload.generationId });
+
+    // Step 1: Load storyboard scenes + photos
+    await updateStatus("generating");
+
+    const { data: storyboard } = await supabase
+      .from("storyboards")
+      .select("scenes")
+      .eq("id", payload.storyboardId)
+      .single();
+
+    if (!storyboard) {
+      await updateStatus("failed", { error_message: "Storyboard not found" });
+      throw new Error("Storyboard not found");
+    }
+
+    const scenes = storyboard.scenes as StoryboardScene[];
+
+    // Load signed URLs for each scene's photo
+    const publicClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const photoIds = scenes
+      .filter((s) => s.photoId)
+      .map((s) => s.photoId as string);
+
+    const { data: photos } = await publicClient
+      .schema("video")
+      .from("project_photos")
+      .select("id, storage_path")
+      .in("id", photoIds);
+
+    const photoPathMap = new Map(photos?.map((p) => [p.id, p.storage_path]) ?? []);
+
+    // Step 2: Generate a clip per scene
+    const clipUrls: string[] = [];
+
+    for (let i = 0; i < scenes.length; i++) {
+      const scene = scenes[i];
+      if (!scene) continue;
+
+      logger.info(`Generating clip ${i + 1}/${scenes.length}`, { sceneId: scene.id });
+
+      const storagePath = scene.photoId ? photoPathMap.get(scene.photoId) : null;
+
+      if (!storagePath) {
+        logger.warn("No photo for scene, skipping clip", { sceneId: scene.id });
+        continue;
+      }
+
+      // Get a signed URL for the photo
+      const { data: signedData } = await publicClient.storage
+        .from("studio-uploads")
+        .createSignedUrl(storagePath, 3600);
+
+      if (!signedData?.signedUrl) {
+        logger.warn("Could not get signed URL", { storagePath });
+        continue;
+      }
+
+      try {
+        const clip = await generateVideoClipWithFallback({
+          imageUrl: signedData.signedUrl,
+          prompt: scene.narrationLine ?? scene.sceneLabel,
+          cameraMovement: scene.cameraMovement ?? "slow_pan",
+          modelId: payload.modelId,
+          aspectRatio: payload.aspectRatio,
+        });
+        clipUrls.push(clip.outputUrl);
+        if (clip.usedFallback) {
+          logger.warn("Used fallback model for clip", { sceneId: scene.id });
+        }
+      } catch (err) {
+        logger.error("Clip generation failed", { sceneId: scene.id, error: err });
+        // Continue with remaining scenes rather than aborting
+      }
+    }
+
+    if (clipUrls.length === 0) {
+      await updateStatus("failed", { error_message: "All clip generations failed" });
+      throw new Error("No clips generated");
+    }
+
+    // Step 3: Update to rendering status (Remotion render in Phase 8)
+    // For now, store the first clip as placeholder output_url
+    await updateStatus("rendering", {
+      fal_job_id: `clips-${payload.generationId}`,
+    });
+
+    // Phase 8 will trigger Remotion here to stitch clips
+    // Placeholder: use first clip as "output" until Phase 8
+    const placeholderOutput = clipUrls[0];
+
+    // Step 4: Mark complete + deduct credits
+    await updateStatus("complete", {
+      output_url: placeholderOutput,
+      completed_at: new Date().toISOString(),
+      duration_seconds: scenes.length * 5,
+    });
+
+    // Deduct credits
+    await supabase.from("credit_transactions").insert({
+      user_id: payload.userId,
+      type: "generation_consume",
+      amount: -payload.creditsToDeduct,
+      generation_id: payload.generationId,
+      description: `Video generation - ${scenes.length} scenes`,
+    });
+
+    // Reduce wallet balance
+    await supabase.rpc("deduct_credits", {
+      p_user_id: payload.userId,
+      p_amount: payload.creditsToDeduct,
+    });
+
+    logger.info("Generation complete", {
+      generationId: payload.generationId,
+      clipCount: clipUrls.length,
+      outputUrl: placeholderOutput,
+    });
+
+    return { success: true, clipCount: clipUrls.length, outputUrl: placeholderOutput };
+  },
+});
