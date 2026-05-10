@@ -191,6 +191,14 @@ export function ListingPicker({ onImport, onClose }: ListingPickerProps) {
                           {TYPE_LABELS[listing.property_type] ?? listing.property_type}
                         </Badge>
                       )}
+                      {listing.status && listing.status !== "active" && (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] py-0 px-1.5 border-yellow-500/30 text-yellow-400/70"
+                        >
+                          {listing.status}
+                        </Badge>
+                      )}
                       {listing.bedrooms != null && (
                         <span className="text-studio-text-muted text-[10px]">
                           {listing.bedrooms}bd · {listing.bathrooms}ba

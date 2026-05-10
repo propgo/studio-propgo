@@ -12,6 +12,7 @@ export interface PropGoListing {
   city: string | null;
   state: string | null;
   price: number | null;
+  status: string | null;
   property_type: string | null;
   bedrooms: number | null;
   bathrooms: number | null;
@@ -71,6 +72,8 @@ export async function getAgentListings(): Promise<{
 
   // Read listings + primary image via service role (cross-schema read)
   const service = getServiceSupabase();
+  // Match by agent_id OR owner_id — cover both PropGo roles
+  // No status filter: include draft/active/pending so agents see all their listings
   const { data, error } = await service
     .from("properties")
     .select(`
@@ -81,6 +84,7 @@ export async function getAgentListings(): Promise<{
       state,
       price,
       property_type,
+      status,
       bedrooms,
       bathrooms,
       built_up_area,
@@ -92,8 +96,8 @@ export async function getAgentListings(): Promise<{
       features,
       property_images!left(url, sort_order, is_primary, image_type)
     `)
-    .eq("agent_id", user.id)
-    .in("status", ["active", "pending", "under_offer"])
+    .or(`agent_id.eq.${user.id},owner_id.eq.${user.id}`)
+    .not("status", "in", '("sold","rented","withdrawn","expired","suspended")')
     .order("created_at", { ascending: false })
     .limit(50);
 
@@ -114,6 +118,7 @@ export async function getAgentListings(): Promise<{
       city: row.city,
       state: row.state,
       price: row.price ? Number(row.price) : null,
+      status: row.status ?? null,
       property_type: row.property_type,
       bedrooms: row.bedrooms,
       bathrooms: row.bathrooms,
@@ -206,7 +211,7 @@ export async function importFromListing(listingId: string): Promise<
       property_images(url, sort_order, is_primary, image_type)
     `)
     .eq("id", listingId)
-    .eq("agent_id", user.id)
+    .or(`agent_id.eq.${user.id},owner_id.eq.${user.id}`)
     .single();
 
   if (listingError || !listing) {
