@@ -99,7 +99,7 @@ export function PropertyDetailsForm({ projectId }: { projectId?: string }) {
         console.error(result.error);
         return;
       }
-      router.push(`/dashboard/projects/${result.projectId}`);
+      router.push(`/dashboard/projects/${result.projectId}/edit?step=2`);
     } finally {
       setSaving(false);
     }
@@ -436,7 +436,7 @@ export function PropertyDetailsForm({ projectId }: { projectId?: string }) {
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <>
-              Next: Floor Plans
+              Save &amp; Continue
               <ArrowRight className="w-4 h-4" />
             </>
           )}
