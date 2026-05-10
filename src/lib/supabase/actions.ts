@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "./server";
 
+function getAppUrl() {
+  return (process.env.NEXT_PUBLIC_APP_URL ?? "https://studio.propgo.my")
+    .trim()
+    .replace(/\/+$/, "");
+}
+
 export async function signIn(formData: FormData) {
   const supabase = await createClient();
 
@@ -22,6 +28,7 @@ export async function signIn(formData: FormData) {
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
+  const appUrl = getAppUrl();
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -32,7 +39,7 @@ export async function signUp(formData: FormData) {
     password,
     options: {
       data: { full_name: fullName },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: `${appUrl}/auth/callback`,
     },
   });
 
@@ -54,11 +61,12 @@ export async function signOut() {
 
 export async function signInWithGoogle(): Promise<{ error: string } | void> {
   const supabase = await createClient();
+  const appUrl = getAppUrl();
 
   // NEXT_PUBLIC_APP_URL must be in Supabase's allowed redirect URLs list
   // Production: https://studio.propgo.my/auth/callback
   // Local: http://localhost:3000/auth/callback
-  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+  const redirectTo = `${appUrl}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

@@ -4,7 +4,9 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const supabase = await createClient();
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://studio.propgo.my";
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "https://studio.propgo.my")
+    .trim()
+    .replace(/\/+$/, "");
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
