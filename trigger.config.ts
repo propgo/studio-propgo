@@ -4,7 +4,7 @@ export default defineConfig({
   project: "propgo-studio",
   runtime: "node",
   logLevel: "log",
-  maxDuration: 300,
+  maxDuration: 3600,
   retries: {
     enabledInDev: false,
     default: {
