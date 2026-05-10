@@ -52,7 +52,7 @@ export async function isUserAgent(): Promise<boolean> {
     .eq("id", user.id)
     .single();
 
-  return data?.role === "agent";
+  return data?.role === "agent" || data?.role === "agency_owner";
 }
 
 // Fetch agent's active listings from PropGo
@@ -93,7 +93,7 @@ export async function getAgentListings(): Promise<{
       property_images!left(url, sort_order, is_primary, image_type)
     `)
     .eq("agent_id", user.id)
-    .in("status", ["active", "for_sale", "for_rent"])
+    .in("status", ["active", "pending", "under_offer"])
     .order("created_at", { ascending: false })
     .limit(50);
 

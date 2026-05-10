@@ -131,10 +131,11 @@ export function ListingPicker({ onImport, onClose }: ListingPickerProps) {
             <span className="text-sm">Loading your listings…</span>
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-2">
-            <p className="text-red-400 text-sm">{error}</p>
-            <p className="text-studio-text-muted text-xs">
-              This feature requires a PropGo agent account.
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <Building2 className="w-8 h-8 text-studio-text-muted/30" />
+            <p className="text-white/70 text-sm font-medium">No listings available</p>
+            <p className="text-studio-text-muted text-xs text-center max-w-xs">
+              This feature is available for PropGo agents with active property listings.
             </p>
           </div>
         ) : filtered.length === 0 ? (
