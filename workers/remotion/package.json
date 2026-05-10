@@ -1,0 +1,33 @@
+{
+  "name": "propgo-studio-remotion-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node dist/api/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/api/server.ts",
+    "build": "tsc",
+    "render:studio": "remotion studio",
+    "render:preview": "ts-node src/api/render-preview.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.750.0",
+    "@aws-sdk/s3-request-presigner": "^3.750.0",
+    "@remotion/bundler": "^4.0.290",
+    "@remotion/cli": "^4.0.290",
+    "@remotion/renderer": "^4.0.290",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "remotion": "^4.0.290",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.15.3",
+    "@types/uuid": "^10.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}

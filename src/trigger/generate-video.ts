@@ -126,19 +126,87 @@ export const generatePropertyVideo = task({
       throw new Error("No clips generated");
     }
 
-    // Step 3: Update to rendering status (Remotion render in Phase 8)
-    // For now, store the first clip as placeholder output_url
+    // Step 3: Call Remotion worker to stitch clips
     await updateStatus("rendering", {
       fal_job_id: `clips-${payload.generationId}`,
     });
 
-    // Phase 8 will trigger Remotion here to stitch clips
-    // Placeholder: use first clip as "output" until Phase 8
-    const placeholderOutput = clipUrls[0];
+    const workerUrl = process.env.REMOTION_WORKER_URL;
+    let finalOutputUrl = clipUrls[0]; // fallback = first raw clip
+
+    if (workerUrl) {
+      try {
+        const manifest = {
+          generationId: payload.generationId,
+          projectTitle: "Property Video",
+          scenes: scenes
+            .map((s, i) => ({
+              id: s.id,
+              clipUrl: clipUrls[i] ?? clipUrls[0],
+              narrationLine: payload.voiceoverScript.find((v) => v.sceneId === s.id)?.narrationLine ?? s.narrationLine ?? "",
+              sceneLabel: s.sceneLabel,
+              durationSeconds: 5,
+              cameraMovement: s.cameraMovement ?? "static",
+            }))
+            .filter((_, i) => clipUrls[i]),
+          brandKit: {
+            agentName: "PropGo Agent",
+            primaryColor: "#4A6CF7",
+          },
+          musicTrack: payload.musicTrack,
+          aspectRatio: payload.aspectRatio,
+          quality: payload.quality,
+          watermark: false,
+        };
+
+        const workerSecret = process.env.WORKER_SECRET ?? "";
+        const renderRes = await fetch(`${workerUrl}/render`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(workerSecret ? { Authorization: `Bearer ${workerSecret}` } : {}),
+          },
+          body: JSON.stringify(manifest),
+        });
+
+        if (renderRes.ok) {
+          const { jobId } = await renderRes.json() as { jobId: string };
+
+          // Poll for completion (max 45 min)
+          let outputUrl: string | null = null;
+          for (let poll = 0; poll < 540; poll++) {
+            await new Promise((r) => setTimeout(r, 5000));
+            const statusRes = await fetch(`${workerUrl}/render/${jobId}/status`, {
+              headers: workerSecret ? { Authorization: `Bearer ${workerSecret}` } : {},
+            });
+            if (statusRes.ok) {
+              const status = await statusRes.json() as { status: string; outputUrl: string | null; progress: number };
+              logger.info("Render progress", { progress: status.progress });
+              if (status.status === "complete" && status.outputUrl) {
+                outputUrl = status.outputUrl;
+                break;
+              }
+              if (status.status === "failed") {
+                logger.warn("Remotion render failed, using raw clip fallback");
+                break;
+              }
+            }
+          }
+
+          if (outputUrl) finalOutputUrl = outputUrl;
+        } else {
+          logger.warn("Remotion worker returned error, using raw clip fallback");
+        }
+      } catch (err) {
+        logger.warn("Remotion worker unreachable, using raw clip fallback", { err });
+      }
+    } else {
+      logger.warn("REMOTION_WORKER_URL not set — using raw clip as output");
+    }
 
     // Step 4: Mark complete + deduct credits
     await updateStatus("complete", {
-      output_url: placeholderOutput,
+      output_url: finalOutputUrl,
       completed_at: new Date().toISOString(),
       duration_seconds: scenes.length * 5,
     });
@@ -161,9 +229,9 @@ export const generatePropertyVideo = task({
     logger.info("Generation complete", {
       generationId: payload.generationId,
       clipCount: clipUrls.length,
-      outputUrl: placeholderOutput,
+      outputUrl: finalOutputUrl,
     });
 
-    return { success: true, clipCount: clipUrls.length, outputUrl: placeholderOutput };
+    return { success: true, clipCount: clipUrls.length, outputUrl: finalOutputUrl };
   },
 });
