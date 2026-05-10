@@ -51,10 +51,17 @@ function Section({ title, children }: SectionProps) {
 const inputClass =
   "bg-studio-bg border-studio-border text-white placeholder:text-white/25 focus:border-brand-primary/60 focus:ring-brand-primary/20";
 
-export function PropertyDetailsForm({ projectId }: { projectId?: string }) {
+interface PropertyDetailsFormProps {
+  projectId?: string;
+  initialValues?: Partial<PropertyDetailsInput>;
+}
+
+export function PropertyDetailsForm({ projectId, initialValues }: PropertyDetailsFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(
+    initialValues?.keyFeatures ?? []
+  );
 
   const {
     register,
@@ -62,6 +69,7 @@ export function PropertyDetailsForm({ projectId }: { projectId?: string }) {
     control,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<PropertyDetailsInput>({
     resolver: zodResolver(propertyDetailsSchema) as Resolver<PropertyDetailsInput>,
@@ -69,8 +77,23 @@ export function PropertyDetailsForm({ projectId }: { projectId?: string }) {
       bedrooms: 0,
       bathrooms: 0,
       keyFeatures: [],
+      ...initialValues,
     },
   });
+
+  // When initialValues change (import), reset the form
+  useEffect(() => {
+    if (initialValues) {
+      reset({
+        bedrooms: 0,
+        bathrooms: 0,
+        keyFeatures: [],
+        ...initialValues,
+      });
+      setSelectedFeatures(initialValues.keyFeatures ?? []);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(initialValues)]);
 
   const watchedState = watch("state");
   const availableCities = watchedState ? (CITIES_BY_STATE[watchedState] ?? []) : [];
