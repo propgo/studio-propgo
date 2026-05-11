@@ -19,6 +19,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PropGo Studio",
   description: "AI-powered property video generation",
+  icons: {
+    icon: "/propgo_favicon_main.png",
+    apple: "/propgo_favicon_main.png",
+  },
 };
 
 export const viewport: Viewport = {
