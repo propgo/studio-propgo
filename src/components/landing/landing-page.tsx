@@ -6,6 +6,7 @@ import {
   AnimatePresence,
 } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
 import {
   Sparkles,
@@ -97,27 +98,29 @@ function Nav({ landingAuth }: { landingAuth: LandingAuth | null }) {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <motion.div
-            whileHover={{ scale: 1.08, rotate: -4 }}
+            whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 15 }}
-            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            className="shrink-0"
+          >
+            <Image
+              src="/propgo-logo.png"
+              alt="PropGo"
+              width={88}
+              height={30}
+              className="h-7 w-auto object-contain"
+              style={{ mixBlendMode: "lighten" }}
+              priority
+            />
+          </motion.div>
+          <span
+            className="font-bold text-sm tracking-tight"
             style={{
-              background: "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
-              boxShadow: "0 0 20px rgba(74,108,247,0.4)",
+              background: "linear-gradient(90deg, #4A6CF7, #8B5CF6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}
           >
-            <Sparkles className="w-4 h-4 text-white" />
-          </motion.div>
-          <span className="font-bold text-sm tracking-tight text-white">
-            PropGo{" "}
-            <span
-              style={{
-                background: "linear-gradient(90deg, #4A6CF7, #8B5CF6)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Studio
-            </span>
+            Studio
           </span>
         </Link>
 
@@ -1464,27 +1467,24 @@ function Footer() {
           {/* Brand col */}
           <div className="col-span-2">
             <div className="flex items-center gap-2.5 mb-5">
-              <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
+              <Image
+                src="/propgo-logo.png"
+                alt="PropGo"
+                width={88}
+                height={30}
+                className="h-7 w-auto object-contain"
+                style={{ mixBlendMode: "lighten" }}
+              />
+              <span
+                className="font-bold text-sm tracking-tight"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
+                  background: "linear-gradient(90deg, #4A6CF7, #8B5CF6)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
                 }}
               >
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-sm tracking-tight text-white">
-                PropGo{" "}
-                <span
-                  style={{
-                    background: "linear-gradient(90deg, #4A6CF7, #8B5CF6)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
                   Studio
                 </span>
-              </span>
             </div>
             <p className="text-sm text-white/28 leading-relaxed max-w-xs">
               AI-powered property video generation for Malaysian real estate

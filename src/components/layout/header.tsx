@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Clapperboard,
   Zap,
   Palette,
-  Sparkles,
   Plus,
 } from "lucide-react";
 
@@ -48,32 +48,30 @@ export function Header({
           className="flex items-center gap-2.5 shrink-0 mr-3 md:mr-6"
         >
           <motion.div
-            whileHover={{ scale: 1.08, rotate: -4 }}
+            whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 15 }}
-            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 relative overflow-hidden"
+            className="shrink-0"
+          >
+            <Image
+              src="/propgo-logo.png"
+              alt="PropGo"
+              width={80}
+              height={28}
+              className="h-7 w-auto object-contain"
+              style={{ mixBlendMode: "lighten" }}
+              priority
+            />
+          </motion.div>
+          <span
+            className="hidden sm:block font-bold text-sm tracking-tight"
             style={{
-              background: "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
-              boxShadow: "0 0 16px rgba(74,108,247,0.35)",
+              background: "linear-gradient(90deg, #4A6CF7, #8B5CF6)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-            <Sparkles className="w-3.5 h-3.5 text-white relative z-10" />
-          </motion.div>
-          <div className="hidden sm:block">
-            <span className="font-bold text-sm tracking-tight text-white">
-              PropGo
-            </span>
-            <span
-              className="font-bold text-sm tracking-tight"
-              style={{
-                background: "linear-gradient(90deg, #4A6CF7, #8B5CF6)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              {" "}Studio
-            </span>
-          </div>
+            Studio
+          </span>
         </Link>
 
         {/* ── Center nav (desktop) ─────────────────────── */}
