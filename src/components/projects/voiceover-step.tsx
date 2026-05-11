@@ -55,7 +55,7 @@ export function VoiceoverStep({ projectId, scenes }: VoiceoverStepProps) {
         JSON.stringify({ lines, language, voiceStyleId })
       );
     }
-    router.push(`/dashboard/projects/${projectId}/generate`);
+    router.push(`/projects/${projectId}/generate`);
   }
 
   return (
@@ -144,7 +144,7 @@ export function VoiceoverStep({ projectId, scenes }: VoiceoverStepProps) {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => router.push(`/dashboard/projects/${projectId}/edit?step=4`)}
+              onClick={() => router.push(`/projects/${projectId}/edit?step=4`)}
               className="text-white/40 hover:text-white/70 gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -167,7 +167,7 @@ export function VoiceoverStep({ projectId, scenes }: VoiceoverStepProps) {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => router.push(`/dashboard/projects/${projectId}/edit?step=4`)}
+            onClick={() => router.push(`/projects/${projectId}/edit?step=4`)}
             className="text-white/40 hover:text-white/70 gap-2"
           >
             <ArrowLeft className="w-4 h-4" />

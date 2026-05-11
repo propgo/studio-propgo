@@ -27,7 +27,7 @@ export function PhotoStep({ projectId, userId, photos: initialPhotos }: PhotoSte
   const [showReview, setShowReview] = useState(initialPhotos.length > 0);
 
   function handleConfirm() {
-    router.push(`/dashboard/projects/${projectId}/edit?step=4`);
+    router.push(`/projects/${projectId}/edit?step=4`);
   }
 
   return (
@@ -54,7 +54,7 @@ export function PhotoStep({ projectId, userId, photos: initialPhotos }: PhotoSte
             <Button
               type="button"
               variant="ghost"
-              onClick={() => router.push(`/dashboard/projects/${projectId}/edit?step=2`)}
+              onClick={() => router.push(`/projects/${projectId}/edit?step=2`)}
               className="text-white/40 hover:text-white/70 gap-2"
             >
               <ArrowLeft className="w-4 h-4" />

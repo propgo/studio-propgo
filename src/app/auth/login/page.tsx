@@ -47,11 +47,11 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-studio-bg flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-studio-bg flex items-center justify-center relative overflow-hidden px-4 py-8">
       {/* Ambient background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-primary/8 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-brand-accent/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-brand-primary/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-56 md:w-80 h-56 md:h-80 bg-brand-accent/5 rounded-full blur-3xl" />
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -62,7 +62,7 @@ function LoginForm() {
         />
       </div>
 
-      <div className="w-full max-w-md px-6 relative z-10">
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-10 justify-center">
           <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center">
@@ -74,7 +74,7 @@ function LoginForm() {
         </div>
 
         {/* Card */}
-        <div className="bg-studio-surface border border-studio-border rounded-2xl p-8">
+        <div className="bg-studio-surface border border-studio-border rounded-2xl p-6 md:p-8">
           <h1 className="text-2xl font-semibold text-white mb-1">
             Welcome back
           </h1>

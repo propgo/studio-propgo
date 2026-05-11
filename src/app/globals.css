@@ -126,10 +126,13 @@
 
   --color-studio-bg: #0A0A0F;
   --color-studio-surface: #13131A;
+  --color-studio-card: #0F0F18;
   --color-studio-border: #1E1E2E;
   --color-studio-muted: #2A2A3E;
+  --color-studio-accent: #6366F1;
+  --color-studio-text-muted: oklch(1 0 0 / 40%);
 
-  --font-sans: Inter, sans-serif;
+  --font-sans: "Geist", "GeistSans", system-ui, sans-serif;
 }
 
 @layer base {
@@ -137,9 +140,35 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: #0A0A0F;
+    color: oklch(0.985 0 0);
+    font-family: var(--font-sans);
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Cinematic grid pattern */
+.studio-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Gradient orb glow */
+@keyframes orb-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -20px) scale(1.05); }
+  66%  { transform: translate(-20px, 15px) scale(0.97); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.animate-orb {
+  animation: orb-drift 18s ease-in-out infinite;
+}
+
+.animate-orb-delay {
+  animation: orb-drift 24s ease-in-out infinite reverse;
 }

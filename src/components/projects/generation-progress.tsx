@@ -158,7 +158,7 @@ export function GenerationProgress({ generationId, projectId, onCancel }: Genera
           />
 
           <Link
-            href="/dashboard/projects"
+            href="/projects"
             className={buttonVariants({
               variant: "ghost",
               className: "w-full text-white/30 hover:text-white/60",
@@ -173,7 +173,7 @@ export function GenerationProgress({ generationId, projectId, onCancel }: Genera
       {isFailed && (
         <div className="flex gap-3">
           <Link
-            href={`/dashboard/projects/${projectId}/generate`}
+            href={`/projects/${projectId}/generate`}
             className={buttonVariants({
               className: "bg-brand-primary hover:bg-brand-primary/90 text-white gap-2",
             })}
@@ -182,7 +182,7 @@ export function GenerationProgress({ generationId, projectId, onCancel }: Genera
             Try Again
           </Link>
           <Link
-            href="/dashboard/projects"
+            href="/projects"
             className={buttonVariants({
               variant: "ghost",
               className: "text-white/40 gap-2",

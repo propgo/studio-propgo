@@ -20,8 +20,6 @@ interface GeneratePageClientProps {
   initialGenerationId?: string;
 }
 
-// ─── Film strip hero — adapted from VideoGeneratorCard (21st.dev) ─────────────
-
 function FilmStripHero({
   projectTitle,
   sceneCount,
@@ -34,11 +32,9 @@ function FilmStripHero({
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03] backdrop-blur-sm p-5">
-      {/* Ambient glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/12 via-transparent to-transparent pointer-events-none" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-primary/50 to-transparent" />
 
-      {/* Film strip */}
       <div className="flex gap-2 mb-5 overflow-hidden">
         {Array.from({ length: visibleCells }).map((_, i) => (
           <motion.div
@@ -48,7 +44,6 @@ function FilmStripHero({
             transition={{ delay: i * 0.06, type: "spring", bounce: 0.3 }}
             className="flex-1 aspect-video rounded-lg bg-white/5 border border-white/8 flex items-center justify-center relative overflow-hidden min-w-0"
           >
-            {/* Scanline shimmer */}
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent" />
             <Film className="w-4 h-4 text-white/12 relative z-10" />
             <span className="absolute bottom-1 right-1.5 text-[9px] text-white/20 font-mono">
@@ -68,7 +63,6 @@ function FilmStripHero({
         )}
       </div>
 
-      {/* Title + meta */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -96,8 +90,6 @@ function FilmStripHero({
     </div>
   );
 }
-
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export function GeneratePageClient({
   projectId,
@@ -154,7 +146,7 @@ export function GeneratePageClient({
     }
 
     router.push(
-      `/dashboard/projects/${projectId}/generate?generationId=${result.generationId}`
+      `/projects/${projectId}/generate?generationId=${result.generationId}`
     );
     setGenerationId(result.generationId ?? null);
     setStarting(false);
@@ -171,10 +163,9 @@ export function GeneratePageClient({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Back link */}
       <div className="flex items-center gap-2 text-sm">
         <Link
-          href={`/dashboard/projects/${projectId}/edit?step=5`}
+          href={`/projects/${projectId}/edit?step=5`}
           className="flex items-center gap-1 text-white/35 hover:text-white/70 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -182,10 +173,8 @@ export function GeneratePageClient({
         </Link>
       </div>
 
-      {/* VideoGeneratorCard-inspired hero */}
       <FilmStripHero projectTitle={projectTitle} sceneCount={sceneCount} />
 
-      {/* Errors */}
       {error && (
         <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
           {error}
@@ -198,7 +187,6 @@ export function GeneratePageClient({
         </div>
       )}
 
-      {/* Config (unchanged functionality) */}
       <GenerationConfig
         sceneCount={sceneCount || 1}
         userCredits={userCredits}

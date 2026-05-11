@@ -52,7 +52,7 @@ export function StoryboardStep({
         setError(result.error);
         return;
       }
-      router.push(`/dashboard/projects/${projectId}/edit?step=5`);
+      router.push(`/projects/${projectId}/edit?step=5`);
     } finally {
       setSaving(false);
     }
@@ -123,7 +123,7 @@ export function StoryboardStep({
         <Button
           type="button"
           variant="ghost"
-          onClick={() => router.push(`/dashboard/projects/${projectId}/edit?step=3`)}
+          onClick={() => router.push(`/projects/${projectId}/edit?step=3`)}
           className="text-white/40 hover:text-white/70 gap-2"
         >
           <ArrowLeft className="w-4 h-4" />

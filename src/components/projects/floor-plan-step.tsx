@@ -48,7 +48,7 @@ export function FloorPlanStep({ projectId, userId, floorPlans }: FloorPlanStepPr
         <Button
           type="button"
           variant="ghost"
-          onClick={() => router.push(`/dashboard/projects/new?projectId=${projectId}&step=1`)}
+          onClick={() => router.push(`/projects/new?projectId=${projectId}&step=1`)}
           className="text-white/40 hover:text-white/70 gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -56,7 +56,7 @@ export function FloorPlanStep({ projectId, userId, floorPlans }: FloorPlanStepPr
         </Button>
         <Button
           type="button"
-          onClick={() => router.push(`/dashboard/projects/${projectId}/edit?step=3`)}
+          onClick={() => router.push(`/projects/${projectId}/edit?step=3`)}
           className="bg-brand-primary hover:bg-brand-primary/90 text-white gap-2"
         >
           Next: Photos

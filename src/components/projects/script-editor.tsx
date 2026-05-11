@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,8 @@ import {
   ArrowRight,
   AlertCircle,
   CheckCircle2,
+  ArrowUp,
+  ChevronDown,
 } from "lucide-react";
 import { regenerateLineAction } from "@/lib/actions/script";
 import { VOICE_STYLES, type VoiceStyleId } from "@/lib/constants/voices";
@@ -155,67 +158,159 @@ export function ScriptEditor({
   const totalWords = rows.reduce((acc, r) => acc + r.narrationLine.split(" ").length, 0);
   const estimatedSeconds = Math.round(totalWords / 2.5); // avg 2.5 words/sec
 
+  const [prompt, setPrompt] = useState("");
+  const [showVoices, setShowVoices] = useState(false);
+  const promptRef = useRef<HTMLTextAreaElement>(null);
+
+  function handlePromptKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      onRegenerate();
+      setPrompt("");
+    }
+  }
+
+  const currentVoice = VOICE_STYLES.find((v) => v.id === voiceStyleId);
+
   return (
     <div className="space-y-5">
-      {/* Language + Voice selector */}
-      <div className="flex flex-wrap gap-4 p-4 rounded-xl bg-studio-surface border border-studio-border">
-        {/* Language toggle */}
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] text-white/30 font-medium uppercase tracking-widest">Language</p>
-          <div className="flex gap-1.5">
-            {(["en", "bm"] as const).map((lang) => (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => onLanguageChange(lang)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
-                  language === lang
-                    ? "bg-brand-primary border-brand-primary text-white"
-                    : "border-studio-border text-white/40 hover:text-white/70"
-                )}
-              >
-                {lang === "en" ? "English" : "Bahasa Malaysia"}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* ── Animated AI Input bar — adapted from 21st.dev Animated AI Input ── */}
+      <div className="relative rounded-2xl border border-white/8 bg-white/[0.03] backdrop-blur-sm overflow-hidden">
+        {/* Animated top gradient line */}
+        <motion.div
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent 0%, #4A6CF7 50%, transparent 100%)",
+          }}
+          animate={{ backgroundPosition: ["0% 0%", "200% 0%"] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+        />
 
-        {/* Voice selector */}
-        <div className="flex flex-col gap-1.5 flex-1 min-w-48">
-          <p className="text-[11px] text-white/30 font-medium uppercase tracking-widest">Voice</p>
-          <div className="flex flex-wrap gap-1.5">
-            {VOICE_STYLES.filter((v) => v.language === language).map((voice) => (
-              <button
-                key={voice.id}
-                type="button"
-                onClick={() => onVoiceChange(voice.id as VoiceStyleId)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
-                  voiceStyleId === voice.id
-                    ? "bg-brand-primary border-brand-primary text-white"
-                    : "border-studio-border text-white/40 hover:text-white/70"
-                )}
-              >
-                <Mic className="w-3 h-3" />
-                {voice.label}
-              </button>
-            ))}
+        <div className="p-4">
+          {/* Header row */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-brand-primary/20 flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
+              </div>
+              <span className="text-sm font-medium text-white">AI Script</span>
+            </div>
+            <span className="text-xs text-white/25">~{estimatedSeconds}s spoken</span>
           </div>
-        </div>
 
-        {/* Stats */}
-        <div className="flex items-end gap-4 text-xs text-white/30 ml-auto">
-          <span>~{estimatedSeconds}s spoken</span>
-          <button
-            type="button"
-            onClick={onRegenerate}
-            disabled={regenerating}
-            className="flex items-center gap-1 hover:text-white/60 transition-colors"
-          >
-            {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-            Regenerate All
-          </button>
+          {/* Textarea */}
+          <textarea
+            ref={promptRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handlePromptKey}
+            placeholder="Describe a style… e.g. 'Professional and luxurious tone for high-end condo'"
+            rows={1}
+            className="w-full bg-transparent text-sm text-white placeholder:text-white/20 resize-none focus:outline-none leading-relaxed min-h-[40px]"
+          />
+
+          {/* Bottom action row */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+            {/* Left: Language + Voice */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Language toggle */}
+              <div className="flex gap-1">
+                {(["en", "bm"] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => onLanguageChange(lang)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all",
+                      language === lang
+                        ? "bg-brand-primary/20 border-brand-primary/40 text-brand-primary"
+                        : "border-white/8 text-white/30 hover:text-white/60 hover:border-white/15"
+                    )}
+                  >
+                    {lang === "en" ? "EN" : "BM"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Voice picker */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowVoices((v) => !v)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/8 text-[11px] text-white/40 hover:text-white/70 hover:border-white/15 transition-all"
+                >
+                  <Mic className="w-3 h-3" />
+                  {currentVoice?.label ?? "Voice"}
+                  <ChevronDown
+                    className={cn(
+                      "w-3 h-3 transition-transform",
+                      showVoices && "rotate-180"
+                    )}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {showVoices && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full mb-1.5 left-0 z-20 min-w-40 rounded-xl border border-white/10 bg-studio-surface/95 backdrop-blur-xl shadow-xl p-1"
+                    >
+                      {VOICE_STYLES.filter((v) => v.language === language).map(
+                        (voice) => (
+                          <button
+                            key={voice.id}
+                            type="button"
+                            onClick={() => {
+                              onVoiceChange(voice.id as VoiceStyleId);
+                              setShowVoices(false);
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors",
+                              voiceStyleId === voice.id
+                                ? "bg-brand-primary/15 text-brand-primary"
+                                : "text-white/50 hover:text-white hover:bg-white/5"
+                            )}
+                          >
+                            <Mic className="w-3 h-3 shrink-0" />
+                            {voice.label}
+                          </button>
+                        )
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Right: Regenerate button */}
+            <motion.button
+              type="button"
+              onClick={() => {
+                onRegenerate();
+                setPrompt("");
+              }}
+              disabled={regenerating}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.95 }}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all",
+                regenerating
+                  ? "bg-brand-primary/10 text-brand-primary/50 cursor-not-allowed"
+                  : "bg-brand-primary text-white hover:bg-brand-primary/90 shadow-lg shadow-brand-primary/25"
+              )}
+            >
+              {regenerating ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <ArrowUp className="w-3.5 h-3.5" />
+              )}
+              {regenerating ? "Generating…" : "Regenerate"}
+            </motion.button>
+          </div>
         </div>
       </div>
 

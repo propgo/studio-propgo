@@ -18,8 +18,8 @@ export async function startSubscriptionCheckout(stripePriceId: string) {
     userId: user.id,
     email: user.email ?? "",
     mode: "subscription",
-    successUrl: `${BASE_URL}/dashboard/credits?upgraded=1`,
-    cancelUrl: `${BASE_URL}/dashboard/credits`,
+    successUrl: `${BASE_URL}/credits?upgraded=1`,
+    cancelUrl: `${BASE_URL}/credits`,
   });
 
   redirect(url);
@@ -37,8 +37,8 @@ export async function startTopupCheckout(stripePriceId: string) {
     userId: user.id,
     email: user.email ?? "",
     mode: "payment",
-    successUrl: `${BASE_URL}/dashboard/credits?topup=1`,
-    cancelUrl: `${BASE_URL}/dashboard/credits`,
+    successUrl: `${BASE_URL}/credits?topup=1`,
+    cancelUrl: `${BASE_URL}/credits`,
     metadata: { type: "topup" },
   });
 
@@ -59,11 +59,11 @@ export async function openBillingPortal() {
     .eq("user_id", user.id)
     .single();
 
-  if (!sub?.stripe_customer_id) redirect("/dashboard/credits");
+  if (!sub?.stripe_customer_id) redirect("/credits");
 
   const url = await createCustomerPortalSession(
     sub.stripe_customer_id as string,
-    `${BASE_URL}/dashboard/credits`
+    `${BASE_URL}/credits`
   );
 
   redirect(url);

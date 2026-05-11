@@ -122,7 +122,7 @@ export function PropertyDetailsForm({ projectId, initialValues }: PropertyDetail
         console.error(result.error);
         return;
       }
-      router.push(`/dashboard/projects/${result.projectId}/edit?step=2`);
+      router.push(`/projects/${result.projectId}/edit?step=2`);
     } finally {
       setSaving(false);
     }
@@ -445,7 +445,7 @@ export function PropertyDetailsForm({ projectId, initialValues }: PropertyDetail
         <Button
           type="button"
           variant="ghost"
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/projects")}
           className="text-white/40 hover:text-white/70"
         >
           Cancel
