@@ -12,7 +12,6 @@ import {
   Play,
   Check,
   ArrowRight,
-  Star,
   Zap,
   Globe,
   Clock,
@@ -1006,6 +1005,7 @@ function Features() {
   );
 }
 
+
 // ─── STATS ───────────────────────────────────────────────────────────────────
 
 const statItems = [
@@ -1113,8 +1113,6 @@ function Stats() {
     </section>
   );
 }
-
-// ─── PRICING ─────────────────────────────────────────────────────────────────
 
 const plans = [
   {
@@ -1354,114 +1352,6 @@ function Pricing() {
   );
 }
 
-// ─── TESTIMONIALS ────────────────────────────────────────────────────────────
-
-const testimonials = [
-  {
-    quote:
-      "PropGo Studio changed the way I market properties. I used to spend RM500+ per video — now I generate professional videos in 2 minutes. My listings get 3x more inquiries.",
-    name: "Amirul Haziq",
-    role: "Senior Negotiator, IQI Global KL",
-    initials: "AH",
-    color: "#4A6CF7",
-    rating: 5,
-  },
-  {
-    quote:
-      "The AI voiceover sounds incredibly natural. My Mandarin and English-speaking clients are impressed. It's like having a personal marketing team for a fraction of the cost.",
-    name: "Siti Nurul Ain",
-    role: "Property Consultant, Hartamas Real Estate",
-    initials: "SN",
-    color: "#8B5CF6",
-    rating: 5,
-  },
-  {
-    quote:
-      "We onboarded our entire team of 25 agents onto PropGo Studio. Our listing videos are consistent, branded, and professional. Best investment we've made this year.",
-    name: "Daniel Tan",
-    role: "Agency Director, PropNex Malaysia",
-    initials: "DT",
-    color: "#22C55E",
-    rating: 5,
-  },
-];
-
-function Testimonials() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
-
-  return (
-    <section ref={ref} className="py-24 md:py-36">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <motion.div
-          initial="hidden"
-          animate={isInView ? "show" : "hidden"}
-          variants={stagger()}
-          className="text-center mb-16"
-        >
-          <motion.p
-            variants={fadeUp}
-            className="text-xs font-bold text-brand-primary uppercase tracking-[0.18em] mb-4"
-          >
-            Testimonials
-          </motion.p>
-          <motion.h2
-            variants={fadeUp}
-            className="text-3xl md:text-5xl font-bold tracking-[-0.02em]"
-          >
-            Loved by Malaysian agents
-          </motion.h2>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={t.name}
-              initial={{ opacity: 0, y: 28 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.55, delay: i * 0.13, ease }}
-              className="relative p-7 rounded-2xl border border-white/[0.06] hover:border-white/[0.1] transition-colors"
-              style={{ background: "#13131A" }}
-            >
-              {/* Stars */}
-              <div className="flex gap-1 mb-5">
-                {Array.from({ length: t.rating }).map((_, j) => (
-                  <Star
-                    key={j}
-                    className="w-4 h-4 fill-brand-accent text-brand-accent"
-                  />
-                ))}
-              </div>
-
-              <blockquote className="text-sm md:text-[15px] text-white/55 leading-relaxed mb-7">
-                &ldquo;{t.quote}&rdquo;
-              </blockquote>
-
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0"
-                  style={{
-                    background: `linear-gradient(135deg, ${t.color}, ${t.color}99)`,
-                  }}
-                >
-                  {t.initials}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-white">
-                    {t.name}
-                  </div>
-                  <div className="text-xs text-white/30 mt-0.5">{t.role}</div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── CTA BANNER ──────────────────────────────────────────────────────────────
 
 function CtaBanner() {
   const ref = useRef(null);
@@ -1667,7 +1557,6 @@ export function LandingPage({
       <Features />
       <Stats />
       <Pricing />
-      <Testimonials />
       <CtaBanner />
       <Footer />
     </div>
