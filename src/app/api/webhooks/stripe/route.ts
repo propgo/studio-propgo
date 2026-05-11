@@ -22,12 +22,12 @@ const PRICE_TO_PLAN: Record<string, PlanId> = {
 };
 
 const PRICE_TO_TOPUP_CREDITS: Record<string, number> = {
-  "price_1TVTiCKnHg6syObsSzYuVkrJ": 50,
-  "price_1TVTiDKnHg6syObsM9Q0pqGe": 150,
-  "price_1TVTiEKnHg6syObs85Rd1a9w": 500,
-  ...(process.env.STRIPE_PRICE_TOPUP_SMALL ? { [process.env.STRIPE_PRICE_TOPUP_SMALL]: 50 } : {}),
-  ...(process.env.STRIPE_PRICE_TOPUP_MEDIUM ? { [process.env.STRIPE_PRICE_TOPUP_MEDIUM]: 150 } : {}),
-  ...(process.env.STRIPE_PRICE_TOPUP_LARGE ? { [process.env.STRIPE_PRICE_TOPUP_LARGE]: 500 } : {}),
+  "price_1TVTiCKnHg6syObsSzYuVkrJ": 200,
+  "price_1TVTiDKnHg6syObsM9Q0pqGe": 600,
+  "price_1TVTiEKnHg6syObs85Rd1a9w": 2000,
+  ...(process.env.STRIPE_PRICE_TOPUP_SMALL ? { [process.env.STRIPE_PRICE_TOPUP_SMALL]: 200 } : {}),
+  ...(process.env.STRIPE_PRICE_TOPUP_MEDIUM ? { [process.env.STRIPE_PRICE_TOPUP_MEDIUM]: 600 } : {}),
+  ...(process.env.STRIPE_PRICE_TOPUP_LARGE ? { [process.env.STRIPE_PRICE_TOPUP_LARGE]: 2000 } : {}),
 };
 
 async function grantSubscriptionCredits(userId: string, planId: PlanId, stripeSubscriptionId: string, stripeCustomerId: string) {
@@ -46,9 +46,9 @@ async function grantSubscriptionCredits(userId: string, planId: PlanId, stripeSu
     { onConflict: "user_id" }
   );
 
-  // Reset monthly credits
+  // Reset monthly credits and sync plan on wallet
   await supabase.schema("video").from("wallets").upsert(
-    { user_id: userId, monthly_credits: credits },
+    { user_id: userId, monthly_credits: credits, plan: planId },
     { onConflict: "user_id" }
   );
 

@@ -54,6 +54,11 @@ export const generatePropertyVideo = task({
 
     if (!storyboard) {
       await updateStatus("failed", { error_message: "Storyboard not found" });
+      await supabase.rpc("refund_credits", { p_user_id: payload.userId, p_amount: payload.creditsToDeduct });
+      await supabase.from("credit_transactions").insert({
+        user_id: payload.userId, type: "refund", amount: payload.creditsToDeduct,
+        generation_id: payload.generationId, description: "Refund: storyboard not found",
+      });
       throw new Error("Storyboard not found");
     }
 
@@ -123,6 +128,11 @@ export const generatePropertyVideo = task({
 
     if (clipUrls.length === 0) {
       await updateStatus("failed", { error_message: "All clip generations failed" });
+      await supabase.rpc("refund_credits", { p_user_id: payload.userId, p_amount: payload.creditsToDeduct });
+      await supabase.from("credit_transactions").insert({
+        user_id: payload.userId, type: "refund", amount: payload.creditsToDeduct,
+        generation_id: payload.generationId, description: "Refund: all clip generations failed",
+      });
       throw new Error("No clips generated");
     }
 
@@ -224,26 +234,11 @@ export const generatePropertyVideo = task({
       logger.warn("REMOTION_WORKER_URL not set — using raw clip as output");
     }
 
-    // Step 5: Mark complete + deduct credits
+    // Step 5: Mark complete — credits already deducted upfront in startGeneration
     await updateStatus("complete", {
       output_url: finalOutputUrl,
       completed_at: new Date().toISOString(),
       duration_seconds: scenes.length * 5,
-    });
-
-    // Deduct credits
-    await supabase.from("credit_transactions").insert({
-      user_id: payload.userId,
-      type: "generation_consume",
-      amount: -payload.creditsToDeduct,
-      generation_id: payload.generationId,
-      description: `Video generation - ${scenes.length} scenes`,
-    });
-
-    // Reduce wallet balance
-    await supabase.rpc("deduct_credits", {
-      p_user_id: payload.userId,
-      p_amount: payload.creditsToDeduct,
     });
 
     logger.info("Generation complete", {

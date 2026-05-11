@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SUBSCRIPTION_PLANS, TOPUP_PACKS } from "@/lib/constants/plans";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+
+export const dynamic = "force-dynamic";
 import { startSubscriptionCheckout, startTopupCheckout, openBillingPortal } from "@/lib/actions/checkout";
 import { cn } from "@/lib/utils";
 import { Coins, CheckCircle2, Zap, Sparkles, ArrowRight, ExternalLink } from "lucide-react";
@@ -22,8 +25,24 @@ export default async function CreditsPage({
     supabase.schema("video").from("subscriptions").select("plan, status, stripe_customer_id").eq("user_id", user.id).single(),
   ]);
 
-  const monthlyCredits = (wallet?.monthly_credits as number) ?? 0;
-  const topupCredits = (wallet?.topup_credits as number) ?? 0;
+  let resolvedWallet = wallet;
+  if (!resolvedWallet) {
+    const service = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    await service
+      .schema("video")
+      .from("wallets")
+      .upsert(
+        { user_id: user.id, monthly_credits: SUBSCRIPTION_PLANS[0].credits, topup_credits: 0, plan: "free" },
+        { onConflict: "user_id", ignoreDuplicates: true }
+      );
+    resolvedWallet = { monthly_credits: SUBSCRIPTION_PLANS[0].credits, topup_credits: 0 };
+  }
+
+  const monthlyCredits = (resolvedWallet?.monthly_credits as number) ?? 0;
+  const topupCredits = (resolvedWallet?.topup_credits as number) ?? 0;
   const totalCredits = monthlyCredits + topupCredits;
   const currentPlan = (sub?.plan as string) ?? "free";
   const planData = SUBSCRIPTION_PLANS.find((p) => p.id === currentPlan) ?? SUBSCRIPTION_PLANS[0]!;

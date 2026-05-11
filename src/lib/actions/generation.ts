@@ -67,6 +67,30 @@ export async function startGeneration(
     return { error: genError?.message ?? "Failed to create generation record" };
   }
 
+  // Deduct credits upfront so the balance reflects immediately.
+  // The Trigger.dev task will refund on failure.
+  const { error: deductError } = await supabase
+    .schema("video")
+    .rpc("deduct_credits", {
+      p_user_id: user.id,
+      p_amount: input.config.creditCost,
+    });
+
+  if (deductError) {
+    // Roll back the generation record if deduction fails
+    await supabase.schema("video").from("generations").delete().eq("id", generation.id);
+    return { error: "Failed to deduct credits. Please try again." };
+  }
+
+  // Log the transaction immediately
+  await supabase.schema("video").from("credit_transactions").insert({
+    user_id: user.id,
+    type: "generation_consume",
+    amount: -input.config.creditCost,
+    generation_id: generation.id,
+    description: `Video generation queued`,
+  });
+
   // Enqueue Trigger.dev task
   try {
     const handle = await tasks.trigger("generate-property-video", {
@@ -101,8 +125,12 @@ export async function startGeneration(
 
     return { generationId: generation.id as string };
   } catch (err) {
-    // Roll back the generation record if task enqueue fails
+    // Roll back generation record and refund credits if task enqueue fails
     await supabase.schema("video").from("generations").delete().eq("id", generation.id);
+    await supabase.schema("video").rpc("refund_credits", {
+      p_user_id: user.id,
+      p_amount: input.config.creditCost,
+    });
     const msg = err instanceof Error ? err.message : "Failed to start generation";
     return { error: msg };
   }
