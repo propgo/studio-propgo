@@ -26,18 +26,30 @@ import {
   Film,
   Mic,
   Palette,
+  Plus,
+  Clapperboard,
 } from "lucide-react";
+import { ProfileDropdown } from "@/components/layout/profile-dropdown";
+
+// ─── LANDING AUTH (SSR pass-through) ───────────────────────────────────────────
+
+export type LandingAuth = {
+  userEmail: string;
+  userName?: string;
+  plan: string;
+  credits: number;
+};
 
 // ─── ANIMATION PRESETS ────────────────────────────────────────────────────────
 
-const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const ease = [0.22, 1, 0.36, 1] as const;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.6, ease },
   },
 };
 
@@ -54,9 +66,13 @@ const navLinks = [
   { label: "Pricing", href: "#pricing" },
 ];
 
-function Nav() {
+function Nav({ landingAuth }: { landingAuth: LandingAuth | null }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const isAuthed = Boolean(landingAuth);
+  const displayName =
+    landingAuth?.userName ?? landingAuth?.userEmail ?? "User";
+  const initial = displayName.charAt(0).toUpperCase();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -121,23 +137,67 @@ function Nav() {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-3 ml-auto">
-          <Link
-            href="/auth/login"
-            className="text-sm text-white/50 hover:text-white transition-colors cursor-pointer px-3 py-2 rounded-xl hover:bg-white/[0.04]"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/auth/signup"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95 cursor-pointer"
-            style={{
-              background: "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
-              boxShadow: "0 0 20px rgba(74,108,247,0.3)",
-            }}
-          >
-            Start Free
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          {isAuthed && landingAuth ? (
+            <>
+              <Link
+                href="/projects/new"
+                className="flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
+                  boxShadow: "0 0 16px rgba(74,108,247,0.3)",
+                }}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New
+              </Link>
+              <Link
+                href="/credits"
+                className="flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{
+                    repeat: Infinity,
+                    repeatDelay: 5,
+                    duration: 0.5,
+                  }}
+                >
+                  <Zap className="w-3.5 h-3.5 text-brand-accent" />
+                </motion.div>
+                <span className="text-sm font-bold text-white tabular-nums">
+                  {landingAuth.credits}
+                </span>
+              </Link>
+              <ProfileDropdown
+                displayName={displayName}
+                plan={landingAuth.plan}
+                credits={landingAuth.credits}
+                initial={initial}
+              />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="text-sm text-white/50 hover:text-white transition-colors cursor-pointer px-3 py-2 rounded-xl hover:bg-white/[0.04]"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
+                  boxShadow: "0 0 20px rgba(74,108,247,0.3)",
+                }}
+              >
+                Start Free
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -162,7 +222,7 @@ function Nav() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.22 }}
-            className="md:hidden border-t border-white/[0.06] overflow-hidden"
+            className="md:hidden border-t border-white/[0.06]"
             style={{ background: "rgba(10,10,15,0.97)", backdropFilter: "blur(20px)" }}
           >
             <div className="px-4 py-4 flex flex-col gap-1">
@@ -177,22 +237,72 @@ function Nav() {
                 </a>
               ))}
               <div className="mt-2 flex flex-col gap-2 pt-2 border-t border-white/[0.06]">
-                <Link
-                  href="/auth/login"
-                  className="px-4 py-2.5 rounded-xl text-sm text-center text-white/60 hover:bg-white/[0.05] transition-colors"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white text-center"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
-                  }}
-                >
-                  Start Free
-                </Link>
+                {isAuthed && landingAuth ? (
+                  <>
+                    <Link
+                      href="/projects/new"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex cursor-pointer items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
+                      }}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      New project
+                    </Link>
+                    <Link
+                      href="/projects"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex cursor-pointer items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/[0.06] transition-colors border border-white/[0.08]"
+                    >
+                      <Clapperboard className="w-4 h-4 shrink-0" />
+                      Open studio
+                    </Link>
+                    <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03]">
+                      <Link
+                        href="/credits"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex flex-1 items-center gap-2 min-w-0 cursor-pointer hover:opacity-90"
+                      >
+                        <Zap className="w-4 h-4 text-brand-accent shrink-0" />
+                        <div className="min-w-0">
+                          <div className="text-[11px] text-white/40">
+                            Credits
+                          </div>
+                          <div className="text-sm font-bold text-white tabular-nums truncate">
+                            {landingAuth.credits}
+                          </div>
+                        </div>
+                      </Link>
+                      <ProfileDropdown
+                        displayName={displayName}
+                        plan={landingAuth.plan}
+                        credits={landingAuth.credits}
+                        initial={initial}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className="px-4 py-2.5 rounded-xl text-sm text-center text-white/60 hover:bg-white/[0.05] transition-colors"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white text-center cursor-pointer"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #4A6CF7 0%, #8B5CF6 100%)",
+                      }}
+                    >
+                      Start Free
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
@@ -1543,10 +1653,14 @@ function Footer() {
 
 // ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
 
-export function LandingPage() {
+export function LandingPage({
+  landingAuth = null,
+}: {
+  landingAuth?: LandingAuth | null;
+}) {
   return (
     <div className="min-h-screen bg-studio-bg text-white overflow-x-hidden">
-      <Nav />
+      <Nav landingAuth={landingAuth} />
       <Hero />
       <LogoStrip />
       <HowItWorks />
